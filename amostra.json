@@ -1,0 +1,123 @@
+[
+  {
+    "id": "bitcoin",
+    "symbol": "btc",
+    "name": "Bitcoin",
+    "current_price": 612345.67,
+    "market_cap": 12050000000000,
+    "market_cap_rank": 1,
+    "total_volume": 45000000000,
+    "price_change_percentage_24h": 1.85,
+    "circulating_supply": 19800000
+  },
+  {
+    "id": "ethereum",
+    "symbol": "eth",
+    "name": "Ethereum",
+    "current_price": 18234.1,
+    "market_cap": 2190000000000,
+    "market_cap_rank": 2,
+    "total_volume": 21000000000,
+    "price_change_percentage_24h": -0.94,
+    "circulating_supply": 120400000
+  },
+  {
+    "id": "tether",
+    "symbol": "usdt",
+    "name": "Tether",
+    "current_price": 5.42,
+    "market_cap": 610000000000,
+    "market_cap_rank": 3,
+    "total_volume": 180000000000,
+    "price_change_percentage_24h": 0.01,
+    "circulating_supply": 112000000000
+  },
+  {
+    "id": "binancecoin",
+    "symbol": "bnb",
+    "name": "BNB",
+    "current_price": 3120.55,
+    "market_cap": 450000000000,
+    "market_cap_rank": 4,
+    "total_volume": 3100000000,
+    "price_change_percentage_24h": 2.41,
+    "circulating_supply": 144000000
+  },
+  {
+    "id": "solana",
+    "symbol": "sol",
+    "name": "Solana",
+    "current_price": 845.2,
+    "market_cap": 395000000000,
+    "market_cap_rank": 5,
+    "total_volume": 9800000000,
+    "price_change_percentage_24h": -3.12,
+    "circulating_supply": 467000000
+  },
+  {
+    "id": "ripple",
+    "symbol": "xrp",
+    "name": "XRP",
+    "current_price": 12.87,
+    "market_cap": 340000000000,
+    "market_cap_rank": 6,
+    "total_volume": 4200000000,
+    "price_change_percentage_24h": 0.55,
+    "circulating_supply": 26400000000
+  },
+  {
+    "id": "cardano",
+    "symbol": "ada",
+    "name": "Cardano",
+    "current_price": 3.94,
+    "market_cap": 140000000000,
+    "market_cap_rank": 7,
+    "total_volume": 1100000000,
+    "price_change_percentage_24h": -1.77,
+    "circulating_supply": 35500000000
+  },
+  {
+    "id": "dogecoin",
+    "symbol": "doge",
+    "name": "Dogecoin",
+    "current_price": 1.23,
+    "market_cap": 98000000000,
+    "market_cap_rank": 8,
+    "total_volume": 2400000000,
+    "price_change_percentage_24h": 5.02,
+    "circulating_supply": 79600000000
+  },
+  {
+    "id": "avalanche-2",
+    "symbol": "avax",
+    "name": "Avalanche",
+    "current_price": 210.44,
+    "market_cap": 88000000000,
+    "market_cap_rank": 9,
+    "total_volume": 760000000,
+    "price_change_percentage_24h": -0.31,
+    "circulating_supply": 418000000
+  },
+  {
+    "id": "chainlink",
+    "symbol": "link",
+    "name": "Chainlink",
+    "current_price": 132.09,
+    "market_cap": 84000000000,
+    "market_cap_rank": 10,
+    "total_volume": 980000000,
+    "price_change_percentage_24h": 3.66,
+    "circulating_supply": 636000000
+  },
+  {
+    "id": "moeda-sem-preco",
+    "symbol": "nul",
+    "name": "Moeda Sem Preco",
+    "current_price": null,
+    "market_cap": null,
+    "market_cap_rank": null,
+    "total_volume": null,
+    "price_change_percentage_24h": null,
+    "circulating_supply": null
+  }
+]
