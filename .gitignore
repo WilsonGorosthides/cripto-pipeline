@@ -1,0 +1,12 @@
+# Segredos - NUNCA versionar
+.env
+
+# Dados e saidas geradas em execucao
+*.db
+*.csv
+*.log
+
+# Artefatos de build e ambiente
+__pycache__/
+.venv/
+.pytest_cache/
