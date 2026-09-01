@@ -6,6 +6,12 @@ Acompanhar preço e capitalização de mercado de criptomoedas exige abrir site,
 
 Este pipeline coleta os dados sozinho, guarda cada leitura com data e hora e entrega uma base pronta para o Power BI. O histórico se forma automaticamente a cada execução.
 
+## Painel
+
+![Painel do Power BI conectado ao PostgreSQL](docs/painel.png)
+
+Painel construído sobre a tabela `precos_cripto` e a view `vw_cripto_atual`. A série de preço é a leitura direta do que o pipeline acumulou: uma coleta por hora, gravada pelo Agendador de Tarefas do Windows.
+
 ## Entrada
 
 API pública da CoinGecko (`/coins/markets`), sem chave e sem custo. Por execução são coletados, para cada moeda: preço, capitalização de mercado, ranking, volume em 24h, variação percentual em 24h e oferta circulante.
@@ -85,13 +91,18 @@ A coleta automatizada é o que forma o histórico. Uma vez por hora é folgado d
 4. Selecione a tabela `precos_cripto`
 5. Modo **Importação** para análise histórica; **DirectQuery** se quiser o dado sempre vivo
 
-Sugestões de visual para o dashboard:
+Visuais do painel:
 
-- **Cartões**: preço atual e capitalização da moeda selecionada (filtrando pela coleta mais recente)
 - **Gráfico de linhas**: `preco` por `coletado_em`, segmentado por `simbolo` — é aqui que o histórico aparece
-- **Gráfico de barras**: `market_cap` por moeda, na última coleta
-- **Tabela**: ranking, símbolo, nome, preço, variação em 24h
-- **Segmentação**: por `simbolo` e por intervalo de datas
+- **Gráfico de barras**: `market_cap` por moeda, limitado às 10 maiores, sobre `vw_cripto_atual`
+- **Tabela**: ranking, símbolo, nome, preço e variação em 24h, sobre `vw_cripto_atual`
+- **Cartões**: capitalização, variação em 24h e data da última coleta
+- **Segmentação**: por `simbolo`
+
+Duas armadilhas de agregação que o painel evita, e que valem mais que os visuais em si:
+
+- **Preço não é aditivo.** O Power BI aplica `Soma` por reflexo em qualquer coluna numérica. Somar o preço de 20 moedas produz um número que não existe, e a curva resultante mede quantas coletas houve no período, não o preço. Preço usa `Média`; `market_cap` e `volume_24h`, que são aditivos, usam `Soma`.
+- **Hierarquia de data em eixo de timestamp.** Ao arrastar `coletado_em` para o eixo, o Power BI insere uma hierarquia Ano/Trimestre/Mês/Dia e agrupa por dia do mês — o que ordena 01 antes de 31 e faz o tempo correr para trás quando a série cruza a virada do mês. O campo precisa entrar como valor contínuo.
 
 Medida DAX útil para isolar a coleta mais recente:
 
