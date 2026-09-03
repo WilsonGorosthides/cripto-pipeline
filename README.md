@@ -118,3 +118,20 @@ UltimaColeta = CALCULATE(MAX(precos_cripto[coletado_em]), ALL(precos_cripto))
 - **Chave única `(moeda_id, moeda_fiat, coletado_em)`.** Impede que uma execução duplicada suje o histórico.
 - **Descarte de linhas sem preço ou sem id.** Registrado no log, não silenciosamente.
 - **Fallback para SQLite.** Permite demonstrar o pipeline inteiro sem infraestrutura montada.
+
+## Servindo os dados por HTTP
+
+O histórico acumulado aqui é consumido por uma API REST em Spring Boot:
+[**cripto-api**](https://github.com/WilsonGorosthides/cripto-api).
+
+```
+CoinGecko ──▶ cripto-pipeline (Python) ──▶ PostgreSQL ──▶ cripto-api (Java) ──▶ HTTP
+                  de hora em hora                            sob demanda
+```
+
+São repositórios separados porque são unidades de implantação diferentes: este é um job em
+lote que roda por segundos e termina; a API é um serviço de vida longa. Cada um sobe,
+escala e falha sem o outro.
+
+A tabela `precos_cripto` pertence a este projeto. A API a lê como somente leitura e não
+emite DDL sobre ela.
