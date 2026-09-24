@@ -2,7 +2,7 @@
 
 > **Projeto encerrado.** A coleta automática rodou de 2026-08-31 a 2026-09-24 e foi
 > desligada — nada mais consome o dado desde que a [cripto-api](https://github.com/WilsonGorosthides/cripto-api)
-> foi congelada. O código roda; o que parou foi o agendamento. Os números medidos da
+> ficou sem evolução prevista. O código roda; o que parou foi o agendamento. Os números medidos da
 > operação estão em [Encerramento](#encerramento).
 
 ## Problema
@@ -156,7 +156,7 @@ emite DDL sobre ela.
 ## Encerramento
 
 A coleta automática foi desligada em **2026-09-24**. Motivo: a `cripto-api`, único consumidor
-deste dado, foi congelada em 09/09 e não está hospedada — manter a coleta viva era custo sem
+deste dado, ficou sem evolução prevista em 09/09 e não está hospedada — manter a coleta viva era custo sem
 retorno. O agendamento foi **desabilitado, não removido**, e o banco foi preservado.
 
 ### O que a operação produziu
