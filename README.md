@@ -1,5 +1,10 @@
 # Pipeline de Criptomoedas — API → Python/Pandas → PostgreSQL → Power BI
 
+> **Projeto encerrado.** A coleta automática rodou de 2026-08-31 a 2026-09-24 e foi
+> desligada — nada mais consome o dado desde que a [cripto-api](https://github.com/WilsonGorosthides/cripto-api)
+> foi congelada. O código roda; o que parou foi o agendamento. Os números medidos da
+> operação estão em [Encerramento](#encerramento).
+
 ## Problema
 
 Acompanhar preço e capitalização de mercado de criptomoedas exige abrir site, copiar número e colar em planilha — várias vezes por dia, e sem histórico nenhum ao final do mês.
@@ -10,7 +15,9 @@ Este pipeline coleta os dados sozinho, guarda cada leitura com data e hora e ent
 
 ![Painel do Power BI conectado ao PostgreSQL](docs/painel.png)
 
-Painel construído sobre a tabela `precos_cripto` e a view `vw_cripto_atual`. A série de preço é a leitura direta do que o pipeline acumulou: uma coleta por hora, gravada pelo Agendador de Tarefas do Windows.
+Painel construído sobre a tabela `precos_cripto` e a view `vw_cripto_atual`. A série de preço é a leitura direta do que o pipeline acumulou, gravado pelo Agendador de Tarefas do Windows.
+
+**Esta captura é de 2026-09-01**, no segundo dia de operação — o painel não foi regravado depois, e a série seguiu crescendo até as 113 coletas registradas em [Encerramento](#encerramento). O que a imagem mostra é o formato do painel, não o volume final.
 
 ## Entrada
 
@@ -36,10 +43,13 @@ Tabela `precos_cripto` no PostgreSQL, um registro por moeda por coleta:
 
 Exportação em CSV opcional, com `--csv`.
 
-## Tempo economizado
+## Por que automatizar
 
-Coleta manual de 20 moedas em planilha: ~12 minutos por rodada, com erro de digitação e sem histórico.
-Este pipeline: **~4 segundos**, sem intervenção, com série histórica acumulada.
+A alternativa era o que o [Problema](#problema) descreve: abrir o site, copiar número, colar em planilha. **Nunca cronometrei quanto isso levaria**, então não há número aqui para comparar. O que a automação entrega e a planilha não entregava é **série histórica** — cada leitura fica gravada com data e hora, e o histórico existe no fim do mês sem ninguém ter mantido nada.
+
+O lado automatizado, esse dá para medir. Em 113 execuções, o trecho entre "20 moedas recebidas da API" e "coleta finalizada" — tratamento com pandas mais gravação no banco — levou **mediana abaixo de 1 segundo**, média de 0,54 s e 5 s no pior caso.
+
+Esse número **não é o tempo de ponta a ponta**: a partida do interpretador Python e a própria requisição HTTP ficam de fora, porque o log não as instrumenta.
 
 ---
 
@@ -73,7 +83,11 @@ DATABASE_URL=postgresql+psycopg2://usuario:senha@localhost:5432/cripto
 
 ## Agendamento
 
-A coleta automatizada é o que forma o histórico. Uma vez por hora é folgado dentro do limite de requisições da API pública.
+> O agendamento **está desligado** desde 2026-09-24 (ver [Encerramento](#encerramento)). As instruções abaixo continuam válidas para quem quiser rodar o pipeline.
+
+A coleta automatizada é o que forma o histórico. Uma vez por hora é folgado dentro do limite de requisições da API pública — em 113 coletas, a API nunca devolveu HTTP 429.
+
+Vale a ressalva de que "de hora em hora" depende da máquina estar ligada. Aqui foram **113 coletas em 24 dias** — cerca de 4,7 por dia, não 24: o agendador dispara de hora em hora, mas só quando o computador está de pé.
 
 **Linux / macOS** (`crontab -e`):
 
@@ -126,7 +140,8 @@ O histórico acumulado aqui é consumido por uma API REST em Spring Boot:
 
 ```
 CoinGecko ──▶ cripto-pipeline (Python) ──▶ PostgreSQL ──▶ cripto-api (Java) ──▶ HTTP
-                  de hora em hora                            sob demanda
+              113 coletas, 24 dias                          sob demanda
+                  (encerrado)
 ```
 
 São repositórios separados porque são unidades de implantação diferentes: este é um job em
@@ -135,3 +150,68 @@ escala e falha sem o outro.
 
 A tabela `precos_cripto` pertence a este projeto. A API a lê como somente leitura e não
 emite DDL sobre ela.
+
+---
+
+## Encerramento
+
+A coleta automática foi desligada em **2026-09-24**. Motivo: a `cripto-api`, único consumidor
+deste dado, foi congelada em 09/09 e não está hospedada — manter a coleta viva era custo sem
+retorno. O agendamento foi **desabilitado, não removido**, e o banco foi preservado.
+
+### O que a operação produziu
+
+| medida | valor |
+|---|---|
+| Primeira coleta | 2026-08-31 17:39:50 |
+| Última coleta | 2026-09-24 |
+| Janela | **24 dias** |
+| Coletas concluídas | **113** |
+| Cadência real | ~4,7 por dia (o agendador dispara de hora em hora, mas só com a máquina ligada) |
+| Moedas por coleta | 20 |
+| Linhas gravadas | **2.260** — destas, 40 foram para o SQLite de fallback, nas duas primeiras rodadas, antes de o PostgreSQL estar configurado |
+
+### O que o retry absorveu
+
+O tratamento de falha de rede não ficou decorativo: foi exercitado.
+
+| medida | valor |
+|---|---|
+| Tentativas que falharam e foram repetidas com sucesso | **25** |
+| Coletas perdidas mesmo após esgotar as tentativas | **3** |
+| Taxa de sucesso | **113 de 116** |
+| Ocorrências de HTTP 429 | **nenhuma** |
+
+As três perdas foram falha de DNS e timeout **da própria máquina**, não recusa da CoinGecko. E **nenhum 429 aconteceu** — o que o backoff salvou aqui foi rede instável, não limite de API.
+
+**Limitação conhecida:** o retry repete em qualquer `requests.RequestException`, o que inclui HTTP 4xx — um 404 é tentado três vezes à toa. O certo seria repetir só em 429, 5xx e erro de rede.
+
+### Reproduzir os números
+
+Os valores das tabelas acima saem do `coleta.log`, versionado neste repositório:
+
+```bash
+grep -c "Coleta finalizada com sucesso" coleta.log   # coletas concluídas
+grep -cE "ERROR \|"  coleta.log                      # coletas perdidas
+grep -cE "WARNING \|" coleta.log                     # tentativas repetidas
+```
+
+A contagem autoritativa de linhas é a do banco:
+
+```sql
+SELECT count(*) AS linhas,
+       count(DISTINCT coletado_em) AS coletas,
+       count(DISTINCT moeda_id) AS moedas,
+       min(coletado_em) AS primeira,
+       max(coletado_em) AS ultima
+  FROM precos_cripto;
+```
+
+### Religar
+
+```powershell
+Enable-ScheduledTask -TaskName "cripto-pipeline-coleta"
+```
+
+O código não foi tocado. Uma execução manual (`python coleta_cripto.py`) continua funcionando
+e continua acrescentando à mesma série.
