@@ -182,10 +182,9 @@ O tratamento de falha de rede não ficou decorativo: foi exercitado.
 | Taxa de sucesso | **113 de 116** |
 | Ocorrências de HTTP 429 | **nenhuma** |
 
-As três perdas foram falha de DNS e timeout **da própria máquina** — `getaddrinfo failed` e
-`connect timeout` —, não recusa da CoinGecko. Ou seja: o backoff exponencial existe no código
-para 429 e 5xx, mas o que ele de fato salvou neste período foi rede doméstica instável. Vale
-dizer com essa precisão, porque a afirmação "o retry me protegeu do limite da API" seria falsa.
+As três perdas foram falha de DNS e timeout **da própria máquina**, não recusa da CoinGecko. E **nenhum 429 aconteceu** — o que o backoff salvou aqui foi rede instável, não limite de API.
+
+**Limitação conhecida:** o retry repete em qualquer `requests.RequestException`, o que inclui HTTP 4xx — um 404 é tentado três vezes à toa. O certo seria repetir só em 429, 5xx e erro de rede.
 
 ### Reproduzir os números
 
